@@ -12,14 +12,17 @@ const taskRouter = require('./routers/taskrouter');
 const teamRouter = require('./routers/teamrouter');
 const projectRouter = require('./routers/projectrouter');
 const { redirectAuthenticated } = require('./Middleware/auth');
+const cors = require('cors')
 
 require('./config/googleAuthPassport');
 
-app.use(cors());
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
 let middlewareConfigured = false;
+
+app.use(cors());
+
 
 app.set('view engine', 'ejs');
 app.use(express.json({ limit: '32kb' }));
