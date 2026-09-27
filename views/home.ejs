@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TaskFlow | My tasks</title>
+	<link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+	<div class="app-shell" data-user-id="<%= user.id %>">
+		<header class="topbar">
+			<a class="wordmark" href="/" aria-label="TaskFlow home"><span class="wordmark-mark">T</span>TaskFlow</a>
+			<div class="account-controls">
+				<div class="notification-menu">
+					<button class="notification-toggle" id="notificationToggle" type="button" aria-expanded="false" aria-controls="notificationPanel">
+						<span>Reminders</span>
+						<span class="notification-count" id="notificationCount" hidden></span>
+					</button>
+					<section class="notification-panel" id="notificationPanel" aria-labelledby="notificationTitle" hidden>
+						<div class="notification-panel-heading">
+							<h2 id="notificationTitle">Due reminders</h2>
+							<p id="notificationSummary">Tasks due within seven days</p>
+							<button class="browser-alert-toggle" id="browserAlertToggle" type="button">Enable browser alerts</button>
+							<button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">Sound off</button>
+						</div>
+						<p class="notification-feedback" id="notificationFeedback" role="status" aria-live="polite">Loading reminders...</p>
+						<ul class="notification-list" id="notificationList"></ul>
+						<p class="notification-empty" id="notificationEmpty" hidden>No upcoming or overdue tasks.</p>
+					</section>
+				</div>
+				<span class="account-name"><%= user.name %></span>
+				<form method="post" action="/auth/logout">
+					<button class="logout-button" type="submit">Log out</button>
+				</form>
+			</div>
+		</header>
+
+		<main class="workspace">
+			<section class="page-heading" aria-labelledby="page-title">
+				<div>
+					<p class="eyebrow">YOUR WORKSPACE</p>
+					<h1 id="page-title">My tasks</h1>
+				</div>
+				<p class="task-count" id="taskCount" aria-live="polite">Loading tasks...</p>
+			</section>
+
+			<section class="analytics-strip" aria-label="Task analytics">
+				<div><span>Total tasks</span><strong id="metricTotal">--</strong></div>
+				<div><span>In progress</span><strong id="metricInProgress">--</strong></div>
+				<div><span>Overdue</span><strong id="metricOverdue">--</strong></div>
+				<div><span>Time tracked</span><strong id="metricTime">--</strong></div>
+			</section>
+			<div class="analytics-detail-grid">
+				<section class="analytics-trend" aria-labelledby="trendTitle">
+					<h2 id="trendTitle">Completed tasks · last six weeks</h2>
+					<div class="completion-trend" id="completionTrend" role="img" aria-label="Completed tasks by day"></div>
+				</section>
+				<section class="workload-panel" aria-labelledby="workloadTitle">
+					<h2 id="workloadTitle">Open tasks by assignee</h2>
+					<ul id="workloadList" class="workload-list"></ul>
+				</section>
+			</div>
+
+			<section class="collaboration-tools" aria-label="Projects and team management">
+				<div class="collaboration-filters">
+					<label>
+						<span>Project</span>
+						<select id="projectFilter"><option value="">All projects</option></select>
+					</label>
+					<label>
+						<span>Assignee</span>
+						<select id="assigneeFilter"><option value="">Anyone</option></select>
+					</label>
+				</div>
+				<details class="team-management">
+					<summary>Teams and projects</summary>
+					<div class="team-management-grid">
+						<form id="teamForm">
+							<h2>Create a team</h2>
+							<label><span>Team name</span><input name="name" required minlength="2" maxlength="100"></label>
+							<button class="secondary-button" type="submit">Create team</button>
+						</form>
+						<form id="memberForm">
+							<h2>Invite an existing user</h2>
+							<label><span>Team</span><select name="teamId" id="memberTeamSelect" required></select></label>
+							<label><span>Email</span><input name="email" type="email" required maxlength="254"></label>
+							<label><span>Role</span><select name="role"><option value="member">Member</option><option value="admin">Admin</option></select></label>
+							<button class="secondary-button" type="submit">Add member</button>
+						</form>
+						<form id="projectForm">
+							<h2>Create a project</h2>
+							<label><span>Team</span><select name="teamId" id="projectTeamSelect" required></select></label>
+							<label><span>Project name</span><input name="name" required minlength="2" maxlength="100"></label>
+							<label><span>Description</span><input name="description" maxlength="1000"></label>
+							<button class="secondary-button" type="submit">Create project</button>
+						</form>
+						<div>
+							<h2>Team members</h2>
+							<ul class="team-member-list" id="teamMemberList"></ul>
+						</div>
+					</div>
+				</details>
+			</section>
+
+			<section class="composer" aria-labelledby="new-task-title">
+				<div class="section-heading">
+					<h2 id="new-task-title">Create a task</h2>
+					<p>Capture the next thing that needs doing.</p>
+				</div>
+				<form id="createTaskForm" class="create-form">
+					<label class="title-field">
+						<span>Title</span>
+						<input name="title" type="text" minlength="2" maxlength="120" placeholder="e.g. Prepare project brief" required>
+					</label>
+					<label class="description-field">
+						<span>Description</span>
+						<textarea name="description" rows="2" maxlength="2000" placeholder="Add a few details (optional)"></textarea>
+					</label>
+					<label class="priority-field">
+						<span>Priority</span>
+						<select name="priority">
+							<option value="low">Low</option>
+							<option value="medium" selected>Medium</option>
+							<option value="high">High</option>
+						</select>
+					</label>
+					<label class="due-field">
+						<span>Due date</span>
+						<input name="dueDate" type="date">
+					</label>
+					<label class="tags-field">
+						<span>Tags</span>
+						<input name="tags" type="text" maxlength="260" placeholder="work, personal">
+					</label>
+					<label class="subtasks-field">
+						<span>Checklist items</span>
+						<textarea name="subtasks" rows="3" maxlength="2600" placeholder="One checklist item per line"></textarea>
+					</label>
+					<label class="task-project-field">
+						<span>Project</span>
+						<select name="project" id="taskProject"><option value="">Personal task</option></select>
+					</label>
+					<label class="task-assignee-field">
+						<span>Assign to</span>
+						<select name="assignedTo" id="taskAssignee"><option value="">Unassigned</option></select>
+					</label>
+					<label class="recurrence-field">
+						<span>Repeat</span>
+						<select name="repeatFrequency" id="repeatFrequency">
+							<option value="">Does not repeat</option>
+							<option value="daily">Daily</option>
+							<option value="weekly">Weekly</option>
+							<option value="monthly">Monthly</option>
+						</select>
+					</label>
+					<label class="repeat-interval-field">
+						<span>Every</span>
+						<input name="repeatInterval" id="repeatInterval" type="number" min="1" max="365" value="1">
+					</label>
+					<label class="dependencies-field">
+						<span>Blocked by</span>
+						<select name="dependencies" id="taskDependencies" multiple size="3" aria-label="Tasks that must be completed first"></select>
+					</label>
+					<button class="primary-button create-button" type="submit">Add task</button>
+				</form>
+			</section>
+
+			<section class="task-section" aria-labelledby="task-list-title">
+				<div class="workspace-tabs" role="tablist" aria-label="Task views">
+					<button class="workspace-tab is-active" id="listTab" type="button" role="tab" aria-selected="true" aria-controls="listViewPanel" data-view="list">List</button>
+					<button class="workspace-tab" id="boardTab" type="button" role="tab" aria-selected="false" aria-controls="boardViewPanel" data-view="board">Board</button>
+					<button class="workspace-tab" id="calendarTab" type="button" role="tab" aria-selected="false" aria-controls="calendarViewPanel" data-view="calendar">Calendar</button>
+				</div>
+				<div class="list-heading">
+					<div class="section-heading">
+						<h2 id="task-list-title">Task list</h2>
+					</div>
+					<div class="list-tools">
+						<label class="search-field">
+							<span class="visually-hidden">Search this page</span>
+							<input id="taskSearch" type="search" placeholder="Search tasks">
+						</label>
+						<label class="priority-filter">
+							<span class="visually-hidden">Filter by priority</span>
+							<select id="priorityFilter">
+								<option value="">All priorities</option>
+								<option value="high">High priority</option>
+								<option value="medium">Medium priority</option>
+								<option value="low">Low priority</option>
+							</select>
+						</label>
+						<label class="tag-filter">
+							<span class="visually-hidden">Filter by tag</span>
+							<input id="tagFilter" type="search" placeholder="Filter by tag">
+						</label>
+					</div>
+				</div>
+
+				<div class="status-filters" role="group" aria-label="Filter tasks by status">
+					<button class="filter-button is-active" type="button" data-status-filter="" aria-pressed="true">All</button>
+					<button class="filter-button" type="button" data-status-filter="pending" aria-pressed="false">Pending</button>
+					<button class="filter-button" type="button" data-status-filter="in-progress" aria-pressed="false">In progress</button>
+					<button class="filter-button" type="button" data-status-filter="completed" aria-pressed="false">Completed</button>
+				</div>
+				<details class="saved-filters" open>
+					<summary>Saved filters</summary>
+					<div class="saved-filter-controls">
+						<label>
+							<span class="visually-hidden">Saved filter name</span>
+							<input id="savedFilterName" type="text" maxlength="40" placeholder="Name this view">
+						</label>
+						<button class="secondary-button" id="saveFilterButton" type="button">Save current</button>
+						<label>
+							<span class="visually-hidden">Choose saved filter</span>
+							<select id="savedFilterSelect">
+								<option value="">Choose a saved view</option>
+							</select>
+						</label>
+						<button class="secondary-button" id="deleteFilterButton" type="button" disabled>Delete view</button>
+					</div>
+				</details>
+
+					<div id="listViewPanel" role="tabpanel" aria-labelledby="listTab">
+				<p class="notice" id="taskNotice" role="status" aria-live="polite"></p>
+				<div class="loading-state" id="loadingState" role="status" aria-live="polite" hidden>
+					<span class="loading-spinner" aria-hidden="true"></span>
+					<span>Loading tasks...</span>
+				</div>
+				<div class="task-list" id="taskList" aria-live="polite" aria-busy="true"></div>
+				<div class="empty-state" id="emptyState" hidden>
+					<p class="empty-mark" aria-hidden="true">0</p>
+					<h3>No tasks to show</h3>
+					<p>Create a task or adjust your filters.</p>
+				</div>
+				<nav class="pagination" aria-label="Task list pages">
+					<button class="secondary-button" id="previousPage" type="button" disabled>Previous</button>
+					<span id="pageLabel">Page 1</span>
+					<button class="secondary-button" id="nextPage" type="button" disabled>Next</button>
+				</nav>
+				</div>
+
+				<section class="board-view" id="boardViewPanel" role="tabpanel" aria-labelledby="boardTab" hidden>
+					<div class="board-columns">
+						<section class="board-column" data-board-column="pending">
+							<header><h2>Pending</h2><span class="board-count">0</span></header>
+							<div class="board-dropzone" data-board-status="pending"></div>
+						</section>
+						<section class="board-column" data-board-column="in-progress">
+							<header><h2>In progress</h2><span class="board-count">0</span></header>
+							<div class="board-dropzone" data-board-status="in-progress"></div>
+						</section>
+						<section class="board-column" data-board-column="completed">
+							<header><h2>Completed</h2><span class="board-count">0</span></header>
+							<div class="board-dropzone" data-board-status="completed"></div>
+						</section>
+					</div>
+				</section>
+
+				<section class="calendar-view" id="calendarViewPanel" role="tabpanel" aria-labelledby="calendarTab" hidden>
+					<div class="calendar-toolbar">
+						<button class="secondary-button" id="previousMonth" type="button" aria-label="Previous month">Previous</button>
+						<h2 id="calendarMonthLabel"></h2>
+						<button class="secondary-button" id="nextMonth" type="button" aria-label="Next month">Next</button>
+					</div>
+					<div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Tasks by due date"></div>
+				</section>
+			</section>
+		</main>
+	<script src="/js/tasks.js" defer></script>
+</body>
+</html>
