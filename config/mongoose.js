@@ -5,7 +5,7 @@ const db = async () => {
         throw new Error('CONNECT is missing from the environment');
     }
 
-    await mongoose.connect(process.env.CONNECT, { serverSelectionTimeoutMS: 10000 });
+    await mongoose.connect(process.env.CONNECT, { serverSelectionTimeoutMS: 10000, family: 4 });
     console.log('Connected to MongoDB');
     return mongoose.connection;
 };
