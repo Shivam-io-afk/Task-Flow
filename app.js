@@ -15,6 +15,8 @@ const { redirectAuthenticated } = require('./Middleware/auth');
 
 require('./config/googleAuthPassport');
 
+app.use(cors());
+
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
 let middlewareConfigured = false;
